@@ -107,7 +107,7 @@ def write(i, x, y, z, r_x, r_y, r_z):
     client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
     client.bind((SOURCE_ADDR, SOURCE_PORT))
     client.sendto(data, (DESTINATION_ADDR, DESTINATION_PORT))
-    print('sent>> ', binascii.hexlify(data));
+    print('sent>> ', binascii.hexlify(data))
 
     # answer
     recv_data, addr = client.recvfrom(4096)
