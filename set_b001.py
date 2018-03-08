@@ -11,12 +11,15 @@ if "__main__" == __name__:
     DESTINATION_ADDR = '192.168.1.99'
     DESTINATION_PORT = 10040 
 
+    df_len = 10
+    
+
     print('start')
 
     # header
     yerc = "<59><45><52><43>"   # fixed
     header_size = "<20><00>"    # fixed
-    data_size = "<00><00>"      # dynamic (fixed: 0 byte for byte type read)
+    data_size = "<01><00>"      # dynamic (fixed: 1 byte for byte type write)
     reserved1 = "<03><01><00><00>"   # fixed
     blocked = "<00><00><00><00>"    # fixed
     reserved2 = "<39><39><39><39><39><39><39><39>"  # fixed
@@ -24,13 +27,13 @@ if "__main__" == __name__:
 
     # sub header
     command = "<7A><00>"    # byte type
-    data_index = "<02><00>"    # B002
+    data_index = "<01><00>"    # B001
     request_num = "<01>"    # fixed
-    compute = "<01>"    # read: Get_Attribute_All ：0x01
+    compute = "<02>"    # read: Set_Attribute_All ：0x02
     sub_header = command + data_index + request_num + compute
 
     # data
-    data = ""   # no data for read
+    data = "<" + '{:02X}'.format(df_len) + ">"   # no data for read
 
     # request
     ascii_str = header + sub_header + data
@@ -54,6 +57,5 @@ if "__main__" == __name__:
     recv_data, addr = client.recvfrom(4096)
     # TODO check last 1 byte (= B002)
     print('recv<< ', binascii.hexlify(recv_data))
-    result_flag = recv_data[-1]
 
     print('done')
