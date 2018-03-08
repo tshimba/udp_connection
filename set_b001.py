@@ -55,7 +55,6 @@ if "__main__" == __name__:
     # sub header 8 byte
     # data 1 byte
     recv_data, addr = client.recvfrom(4096)
-    # TODO check last 1 byte (= B002)
     print('recv<< ', binascii.hexlify(recv_data))
 
     print('done')
