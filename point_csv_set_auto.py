@@ -62,7 +62,7 @@ def set_data_to_yac(dir_name, file_name):
 
     # ascii code to binary
     data = bytearray()
-    matches = re.findall(r'[0-9A-Z]{2}', ascii_str)
+    matches = re.findall(r'[0-9A-Z]{2}', ascii_str.upper())
     for match in matches:
         data += bytearray.fromhex(match)
 
@@ -162,7 +162,7 @@ def write(i, x, y, z, r_x, r_y, r_z):
 
     # ascii code to binary
     data = bytearray()
-    matches = re.findall(r'[0-9A-Z]{2}', ascii_str)
+    matches = re.findall(r'[0-9A-Z]{2}', ascii_str.upper())
     for match in matches:
         data += bytearray.fromhex(match)
 
@@ -242,7 +242,7 @@ if __name__ == '__main__':
 
         # ascii code to binary
         data = bytearray()
-        matches = re.findall(r'[0-9A-Z]{2}', ascii_str)
+        matches = re.findall(r'[0-9A-Z]{2}', ascii_str.upper())
         for match in matches:
             data += bytearray.fromhex(match)
 
@@ -292,7 +292,7 @@ if __name__ == '__main__':
 
             # ascii code to binary
             data = bytearray()
-            matches = re.findall(r'[0-9A-Z]{2}', ascii_str)
+            matches = re.findall(r'[0-9A-Z]{2}', ascii_str.upper())
             for match in matches:
                 data += bytearray.fromhex(match)
 

@@ -99,7 +99,7 @@ def write(i, x, y, z, r_x, r_y, r_z):
 
     # ascii code to binary
     data = bytearray()
-    matches = re.findall(r'[0-9A-Z]{2}', ascii_str)
+    matches = re.findall(r'[0-9A-Z]{2}', ascii_str.upper())
     for match in matches:
         data += bytearray.fromhex(match)
 

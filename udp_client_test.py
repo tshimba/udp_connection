@@ -35,7 +35,7 @@ if "__main__" == __name__:
 
 
     data = bytearray()
-    matches = re.findall(r'[0-9A-Z]{2}', ascii_str)
+    matches = re.findall(r'[0-9A-Z]{2}', ascii_str.upper())
     for match in matches:
         data += bytearray.fromhex(match)
 
