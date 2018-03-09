@@ -72,7 +72,7 @@ def write(i, x, y, z, r_x, r_y, r_z):
     # sub header
     command = "<7F><00>"    # dynamic
     data_index = i    # dynamic: max: 99
-    request_num = "<01>"    # dynamic (fixed: 1 for data type)
+    request_num = "<00>"    # dynamic (fixed: 1 for data type)
     compute = "<02>"    # dynamic: Set_Attribute_All ：0x02
     padding = "<00><00>"
     sub_header = command + data_index + request_num + compute + padding
