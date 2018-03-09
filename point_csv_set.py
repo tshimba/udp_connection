@@ -23,7 +23,7 @@ def set_data_to_yac(dir_name, file_name):
 
     # 1 loop is 1 line
     for i, v in df.iterrows():
-        write (to_ascii(i, 4),
+        write (to_ascii(i, 2),
                to_ascii(v[0], 4), to_ascii(v[1], 4), 
                to_ascii(v[2], 4), to_ascii(v[3], 4),
                to_ascii(v[4], 4), to_ascii(v[5], 4))
@@ -72,13 +72,13 @@ def write(i, x, y, z, r_x, r_y, r_z):
     # sub header
     command = "<7F><00>"    # dynamic
     data_index = i    # dynamic: max: 99
-    request_num = "<11>"    # dynamic (fixed: robot coordinate value 17)
+    request_num = "<01>"    # dynamic (fixed: 1 for data type)
     compute = "<02>"    # dynamic: Set_Attribute_All ：0x02
     padding = "<00><00>"
     sub_header = command + data_index + request_num + compute + padding
 
     # data
-    data_type = "<00><00><00><00>"  # fixed
+    data_type = "<11><00><00><00>"  # fixed: 11 for robot coordinate
     form = "<00><00><00><00>"  # fixed
     tool_num = "<00><00><00><00>"  # fixed
     user_coor_num = "<00><00><00><00>"  # fixed
