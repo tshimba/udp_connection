@@ -52,7 +52,8 @@ def set_data_to_yac(dir_name, file_name):
     data_index = "<01><00>"    # B001
     request_num = "<01>"    # fixed
     compute = "<02>"    # read: Set_Attribute_All ：0x02
-    sub_header = command + data_index + request_num + compute
+    padding = "<00><00>"
+    sub_header = command + data_index + request_num + compute + padding
 
     # data
     data = "<" + '{:02X}'.format(df_len) + ">"   # no data for read
@@ -137,7 +138,8 @@ def write(i, x, y, z, r_x, r_y, r_z):
     data_index = i    # dynamic: max: 99
     request_num = "<11>"    # dynamic (fixed: robot coordinate value 17)
     compute = "<02>"    # dynamic: Set_Attribute_All ：0x02
-    sub_header = command + data_index + request_num + compute
+    padding = "<00><00>"
+    sub_header = command + data_index + request_num + compute + padding
 
     # data
     data_type = "<00><00><00><00>"  # fixed
@@ -231,7 +233,8 @@ if __name__ == '__main__':
         data_index = "<01><00>"    # dynamic: fixed
         request_num = "<01>"    # fixed
         compute = "<10>"    # Set_Attribute_Single ：0x10
-        sub_header = command + data_index + request_num + compute
+        padding = "<00><00>"
+        sub_header = command + data_index + request_num + compute + padding
 
         # data
         job_start = "<01><00><00><00>"    # fixed
@@ -282,7 +285,8 @@ if __name__ == '__main__':
             data_index = "<02><00>"    # B002
             request_num = "<01>"    # fixed
             compute = "<01>"    # read: Get_Attribute_All ：0x01
-            sub_header = command + data_index + request_num + compute
+            padding = "<00><00>"
+            sub_header = command + data_index + request_num + compute + padding
 
             # data
             data = ""   # no data for read

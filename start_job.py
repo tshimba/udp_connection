@@ -27,7 +27,8 @@ if "__main__" == __name__:
     data_index = "<01><00>"    # dynamic: fixed
     request_num = "<01>"    # fixed
     compute = "<10>"    # Set_Attribute_Single ：0x10
-    sub_header = command + data_index + request_num + compute
+    padding = "<00><00>"
+    sub_header = command + data_index + request_num + compute + padding
 
     # data
     job_start = "<01><00><00><00>"    # fixed

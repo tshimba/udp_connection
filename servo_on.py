@@ -27,7 +27,8 @@ if "__main__" == __name__:
     data_index = "<02>" + "<00>"    # max: 99
     request_num = "<01>"    # fixed
     compute = "<10>"    # Set_Attribute_Single ：0x10
-    sub_header = command + data_index + request_num + compute
+    padding = "<00><00>"
+    sub_header = command + data_index + request_num + compute + padding
 
     # data
     on_off = "<01><00><00><00>"    # on: <01><00><00><00>, off: <02><00><00><00>

@@ -29,7 +29,8 @@ if "__main__" == __name__:
         data_index = "<" + '{:02X}'.format(count) + ">" + "<00>"    # max: 99
         request_num = "<01>"    # fixed
         compute = "<02>"    # Set_Attribute_All ：0x02
-        sub_header = command + data_index + request_num + compute
+        padding = "<00><00>"
+        sub_header = command + data_index + request_num + compute + padding
 
         # data
         speed_value = "<F4><01>"    # 500: <F4><01>

@@ -27,7 +27,8 @@ if "__main__" == __name__:
     data_index = "<02><00>"    # B002
     request_num = "<01>"    # fixed
     compute = "<01>"    # read: Get_Attribute_All ：0x01
-    sub_header = command + data_index + request_num + compute
+    padding = "<00><00>"
+    sub_header = command + data_index + request_num + compute + padding
 
     # data
     data = ""   # no data for read

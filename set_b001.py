@@ -30,7 +30,8 @@ if "__main__" == __name__:
     data_index = "<01><00>"    # B001
     request_num = "<01>"    # fixed
     compute = "<02>"    # read: Set_Attribute_All ：0x02
-    sub_header = command + data_index + request_num + compute
+    padding = "<00><00>"
+    sub_header = command + data_index + request_num + compute + padding
 
     # data
     data = "<" + '{:02X}'.format(df_len) + ">"   # no data for read
