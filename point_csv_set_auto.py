@@ -6,17 +6,19 @@ import numpy as np
 import binascii
 import socket
 import re
-import time 
+import time
+import csv
 
 #SOURCE_ADDR = 'localhost'
 SOURCE_ADDR = '192.168.1.10'
-SOURCE_PORT = 10050 
+SOURCE_PORT = 10050
 
 #DESTINATION_ADDR = 'localhost'
 DESTINATION_ADDR = '192.168.1.99'
-DESTINATION_PORT = 10040 
+DESTINATION_PORT = 10040
 
-def set_data_to_yac(dir_name, file_name):
+
+def set_data_to_yac(dir_name, file_name, client):
     ### LOAD CSV FILE START ###
     file_path = os.path.join(dir_name, file_name)
     print('check ', file_path)
@@ -30,11 +32,18 @@ def set_data_to_yac(dir_name, file_name):
         return False
 
     print('loading...')
-    df = pd.read_csv(file_path, header=None)
+
+    # use csvreader instead
+    # robot coord and pulse column does not have the same column number
+    with open(file_path,'r') as csvfile:
+        reader = csv.reader(csvfile)
+        df = list(reader)
+    #df = pd.read_csv(file_path, header=None)
     ### LOAD CSV FILE END ###
 
     ### SET B001 START ###
-    df_len = len(df.index)
+    df_len = len(df)
+    #df_len = len(df.index)
     print('Number of data: ', df_len)
 
     print('Writing the number of data to B001')
@@ -68,8 +77,6 @@ def set_data_to_yac(dir_name, file_name):
         data += bytearray.fromhex(match)
 
     # send data
-    client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-    client.bind((SOURCE_ADDR, SOURCE_PORT))
     client.sendto(data, (DESTINATION_ADDR, DESTINATION_PORT))
     print('sent>> ', binascii.hexlify(data))
 
@@ -86,11 +93,22 @@ def set_data_to_yac(dir_name, file_name):
     ### SET P START ###
     # 1 loop is 1 line
     print('Writing position data...')
-    for i, v in df.iterrows():
-        write (to_ascii(i, 2),
-               to_ascii(v[0], 4), to_ascii(v[1], 4), 
+    for i in range(df_len):
+        v = df[i]
+        r_or_p = v[0]
+        del v[0]
+
+        v = np.array(v).astype(np.int64)
+        if r_or_p == 'p':
+            e = v[6]
+        else:
+            e = np.int64(0)
+
+        write (to_ascii(np.int64(i), 2),
+               to_ascii(v[0], 4), to_ascii(v[1], 4),
                to_ascii(v[2], 4), to_ascii(v[3], 4),
-               to_ascii(v[4], 4), to_ascii(v[5], 4))
+               to_ascii(v[4], 4), to_ascii(v[5], 4),
+               to_ascii(e, 4), r_or_p)
     print('done')
     ### SET P END ###
 
@@ -121,7 +139,7 @@ def to_hex_le(dec, n_byte):
 '''
 write position data to P[i]
 '''
-def write(i, x, y, z, r_x, r_y, r_z):
+def write(i, x, y, z, r_x, r_y, r_z, e, r_or_p):
     #print(i, x, y, z, r_x, r_y, r_z)
 
     # header
@@ -142,7 +160,11 @@ def write(i, x, y, z, r_x, r_y, r_z):
     sub_header = command + data_index + request_num + compute + padding
 
     # data
-    data_type = "<11><00><00><00>"  # fixed
+    # robot or pulse
+    if r_or_p == 'p':
+        data_type = "<00><00><00><00>"  # fixed
+    else:
+        data_type = "<11><00><00><00>"  # fixed
     form = "<00><00><00><00>"  # fixed
     tool_num = "<00><00><00><00>"  # fixed
     user_coor_num = "<00><00><00><00>"  # fixed
@@ -154,7 +176,10 @@ def write(i, x, y, z, r_x, r_y, r_z):
     coor4 = r_x  # dynamic
     coor5 = r_y  # dynamic
     coor6 = r_z  # dynamic
-    coor7 = "<00><00><00><00>"  # fixed
+    if r_or_p == 'p':
+        coor7 = e
+    else:
+        coor7 = "<00><00><00><00>"  # fixed
     coor8 = "<00><00><00><00>"  # fixed
     coors = coor1 + coor2 + coor3 + coor4 + coor5 + coor6 + coor7 + coor8
     data = data_common_part + coors
@@ -169,8 +194,6 @@ def write(i, x, y, z, r_x, r_y, r_z):
         data += bytearray.fromhex(match)
 
     # send data
-    client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-    client.bind((SOURCE_ADDR, SOURCE_PORT))
     client.sendto(data, (DESTINATION_ADDR, DESTINATION_PORT))
     print('sent>> ', binascii.hexlify(data))
 
@@ -193,8 +216,10 @@ def parser():
     args = argparser.parse_args()
     return args.dir_name
 
-    
+
 if __name__ == '__main__':
+    import time
+    start = time.time()
     DEFAULT_DIR = 'csv_files'
     dir_name = parser()
     print('directory name: ', dir_name)
@@ -210,9 +235,13 @@ if __name__ == '__main__':
     files = os.listdir(dir_name)
     print(files)
 
+    # init udp client
+    client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
+    client.bind((SOURCE_ADDR, SOURCE_PORT))
+
     # check all files in the directory
     for file_name in files:
-        success = set_data_to_yac(dir_name, file_name)
+        success = set_data_to_yac(dir_name, file_name, client)
         if not success:
             continue
 
@@ -250,8 +279,6 @@ if __name__ == '__main__':
             data += bytearray.fromhex(match)
 
         # send data
-        client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-        client.bind((SOURCE_ADDR, SOURCE_PORT))
         client.sendto(data, (DESTINATION_ADDR, DESTINATION_PORT))
         print('sent>> ', binascii.hexlify(data));
 
@@ -262,12 +289,14 @@ if __name__ == '__main__':
         print('done')
         ### START JOB END ###
 
+        print('took ' + str(time.time() - start))
+
         ### WAIT JOB COMPLETE START ###
         while True:
             print("wait for job completion")
             for wait_time in range(10): # Delay for 10s
                 print('.', end='', flush=True)
-                time.sleep(1)
+                time.sleep(0.1)
             print()
 
             print("check job status")
@@ -301,8 +330,8 @@ if __name__ == '__main__':
                 data += bytearray.fromhex(match)
 
             # send data
-            client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-            client.bind((SOURCE_ADDR, SOURCE_PORT))
+            #client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
+            #client.bind((SOURCE_ADDR, SOURCE_PORT))
             client.sendto(data, (DESTINATION_ADDR, DESTINATION_PORT))
             print('sent>> ', binascii.hexlify(data))
 
@@ -314,14 +343,14 @@ if __name__ == '__main__':
             # TODO check last 1 byte (= B002)
             print('recv<< ', binascii.hexlify(recv_data))
             result_flag = recv_data[-1]
+            print('took ' + str(time.time() - start))
 
             if result_flag:
                 print('complete!')
                 print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
                 print()
-                time.sleep(1)
+                time.sleep(0.1)
                 break
         ### WAIT JOB COMPLETE END ###
-
 
 
